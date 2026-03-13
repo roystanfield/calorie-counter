@@ -19,7 +19,7 @@ class CalorieEntry {
     var createdAt: Date
     var modifiedAt: Date
     
-    init(date: Date = Date(), calories: Int) {
+    init(calories: Int, date: Date = Date()) {
         self.id = UUID()
         self.date = date
         self.calories = calories

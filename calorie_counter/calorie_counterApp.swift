@@ -14,33 +14,6 @@ struct calorie_counterApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(createModelContainer())
-    }
-    
-    private func createModelContainer() -> ModelContainer {
-        do {
-            // Create a configuration for CloudKit
-            let configuration = ModelConfiguration(
-                "CalorieData",
-                schema: Schema([CalorieEntry.self]),
-                isStoredInMemoryOnly: false,
-                cloudKitDatabase: .automatic
-            )
-            
-            let container = try ModelContainer(for: CalorieEntry.self, configurations: configuration)
-            print("CloudKit-enabled container created successfully")
-            return container
-        } catch {
-            print("Failed to create CloudKit container: \(error)")
-            
-            // Fallback to local storage only
-            do {
-                let fallbackContainer = try ModelContainer(for: CalorieEntry.self)
-                print("Using local-only container")
-                return fallbackContainer
-            } catch {
-                fatalError("Could not create any container: \(error)")
-            }
-        }
+        .modelContainer(for: CalorieEntry.self)
     }
 }

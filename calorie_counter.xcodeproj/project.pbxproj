@@ -10,9 +10,22 @@
 		C6B4AD382F607D9B008FD1CD /* calorie_counter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = calorie_counter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C62E7BEC2F649CCA00F78FCE /* Exceptions for "calorie_counter" folder in "calorie_counter" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C6B4AD372F607D9B008FD1CD /* calorie_counter */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C6B4AD3A2F607D9B008FD1CD /* calorie_counter */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C62E7BEC2F649CCA00F78FCE /* Exceptions for "calorie_counter" folder in "calorie_counter" target */,
+			);
 			path = calorie_counter;
 			sourceTree = "<group>";
 		};
@@ -257,6 +270,7 @@
 				DEVELOPMENT_TEAM = 5A7JF938X2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Thie app reads your step count to display daily health metrics alongside calorie tracking.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -290,6 +304,7 @@
 				DEVELOPMENT_TEAM = 5A7JF938X2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Thie app reads your step count to display daily health metrics alongside calorie tracking.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

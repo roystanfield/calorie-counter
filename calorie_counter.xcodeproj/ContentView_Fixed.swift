@@ -7,7 +7,6 @@
 
 import SwiftUI
 import SwiftData
-import HealthKit
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -15,10 +14,7 @@ struct ContentView: View {
     @State private var calorieInput: String = "0"
     @State private var stepCount: Int = 12134 // Mock data for now
     @State private var dailyCalorieGoal: Int = 2200
-    @State private var showingHealthKitError: Bool = false
     @FocusState private var isInputFocused: Bool
-    
-    private let healthStore = HKHealthStore()
     
     var body: some View {
         NavigationView {
@@ -27,19 +23,17 @@ struct ContentView: View {
                 headerView
                 
                 ScrollView {
-                    VStack(spacing: 20) {
-                        // Main calorie tracking section
-                        mainCalorieSection
+                    VStack(spacing: 16) {
+                        // Calorie tracking card
+                        calorieTrackingCard
                         
-                        // Health metrics section  
-                        healthMetricsSection
+                        // Health metrics card
+                        healthMetricsCard
                         
                         Spacer(minLength: 100) // Space for keyboard
                     }
                     .padding(.horizontal, 16)
-                    .padding(.top, 20)
                 }
-                .background(Color(.systemGroupedBackground))
             }
             .background(Color(.systemGroupedBackground))
             .navigationBarHidden(true)
@@ -67,11 +61,11 @@ struct ContentView: View {
             
             VStack(spacing: 2) {
                 Text("Today")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.black)
+                    .font(.title2)
+                    .fontWeight(.semibold)
                 Text(todayDateString)
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(.black)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
             }
             
             Spacer()
@@ -84,53 +78,50 @@ struct ContentView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-    }
-    
-    // MARK: - Main Calorie Section
-    private var mainCalorieSection: some View {
-        VStack(spacing: 20) {
-            // Large calorie display
-            calorieDisplayView
-            
-            // Current entry input
-            currentEntryInput
-            
-            // Historical entries list
-            historicalEntriesList
-        }
-        .padding(20)
         .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
     }
     
-    private var calorieDisplayView: some View {
-        VStack(spacing: 12) {
-            HStack(alignment: .lastTextBaseline, spacing: 0) {
+    // MARK: - Calorie Tracking Card
+    private var calorieTrackingCard: some View {
+        VStack(spacing: 16) {
+            // Calorie progress display
+            calorieProgressView
+            
+            // Current entry row (auto-focused)
+            currentEntryRow
+            
+            // Historical entries
+            historicalEntriesView
+        }
+        .padding(16)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+    }
+    
+    private var calorieProgressView: some View {
+        VStack(spacing: 8) {
+            HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(consumedCaloriesToday)")
-                    .font(.system(size: 32, weight: .light, design: .default))
-                    .fontWidth(.expanded)
-                    .foregroundColor(.black)
+                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                    .foregroundColor(.primary)
                 
-                Spacer()
-                
-                Text("\(dailyCalorieGoal)")
-                    .font(.system(size: 32, weight: .light, design: .default))
-                    .fontWidth(.expanded)
-                    .foregroundColor(.black)
+                Text("/ \(dailyCalorieGoal)")
+                    .font(.title2)
+                    .foregroundColor(.secondary)
             }
             
-            // Progress bar extending across the full row
+            // Progress bar
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     Rectangle()
-                        .fill(Color(red: 0.918, green: 0.918, blue: 0.918)) // #eaeaea
-                        .frame(width: geometry.size.width, height: 8)
+                        .fill(Color(.systemGray5))
+                        .frame(height: 8)
                         .cornerRadius(4)
                     
                     Rectangle()
                         .fill(Color.blue)
-                        .frame(width: progressBarWidthForFullRow(totalWidth: geometry.size.width), height: 8)
+                        .frame(width: progressBarWidth(for: geometry.size.width), height: 8)
                         .cornerRadius(4)
                         .animation(.easeInOut(duration: 0.3), value: consumedCaloriesToday)
                 }
@@ -139,12 +130,12 @@ struct ContentView: View {
         }
     }
     
-    private var currentEntryInput: some View {
+    private var currentEntryRow: some View {
         HStack {
             Text(currentTimeString)
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.black)
-                .frame(minWidth: 100, alignment: .leading)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.primary)
+                .frame(width: 80, alignment: .leading)
             
             Spacer()
             
@@ -152,45 +143,48 @@ struct ContentView: View {
                 isInputFocused = true
             }) {
                 Text(calorieInput)
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(calorieInput == "0" ? .blue : .black)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(calorieInput == "0" ? .blue : .primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(calorieInput == "0" ? Color.blue : Color(.systemGray6))
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(calorieInput == "0" ? Color.blue.opacity(0.1) : Color(.systemGray6))
                     )
-                    .foregroundColor(calorieInput == "0" ? .white : .black)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(calorieInput == "0" ? Color.blue : Color.clear, lineWidth: 1)
+                    )
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 4)
     }
     
-    private var historicalEntriesList: some View {
+    private var historicalEntriesView: some View {
         VStack(spacing: 0) {
             if let manager = calorieManager {
                 let entries = getTodaysEntries()
                 ForEach(entries, id: \.id) { entry in
-                    historicalEntryRow(for: entry)
+                    entryRow(for: entry)
                 }
             }
         }
     }
     
-    private func historicalEntryRow(for entry: CalorieEntry) -> some View {
+    private func entryRow(for entry: CalorieEntry) -> some View {
         HStack {
             Text(formatTime(entry.date))
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.black)
-                .frame(minWidth: 100, alignment: .leading)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.primary)
+                .frame(width: 80, alignment: .leading)
             
             Spacer()
             
             Text("\(entry.calories)")
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.black)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.primary)
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 8)
         .contentShape(Rectangle())
         .swipeActions(edge: .trailing) {
             Button("Delete", role: .destructive) {
@@ -204,32 +198,26 @@ struct ContentView: View {
         }
     }
     
-    // MARK: - Health Metrics Section
-    private var healthMetricsSection: some View {
-        VStack(spacing: 16) {
-            healthMetricRow(title: "Steps", value: formatStepCount(stepCount))
-            healthMetricRow(title: "Workout", value: "45 min")
-            healthMetricRow(title: "Weight", value: "234 lbs")
+    // MARK: - Health Metrics Card
+    private var healthMetricsCard: some View {
+        VStack(spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Steps")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Text(formatStepCount(stepCount))
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                }
+                
+                Spacer()
+            }
         }
-        .padding(20)
+        .padding(16)
         .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
-    }
-    
-    private func healthMetricRow(title: String, value: String) -> some View {
-        HStack {
-            Text(title)
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.black)
-            
-            Spacer()
-            
-            Text(value)
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.black)
-        }
-        .padding(.vertical, 4)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
     
     // MARK: - Numeric Keypad Sheet
@@ -289,7 +277,7 @@ struct ContentView: View {
                         .fontWeight(.medium)
                 }
             }
-            .foregroundColor(.black)
+            .foregroundColor(.primary)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
         }
@@ -323,61 +311,11 @@ struct ContentView: View {
     // MARK: - Helper Methods
     private func setupInitialState() {
         calorieManager = CalorieManager(modelContext: modelContext)
-        requestHealthKitPermission()
-        fetchStepCount()
-        
-        // Add some mock data for demonstration
-        addMockDataIfNeeded()
         
         // Auto-focus the input
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             isInputFocused = true
         }
-    }
-    
-    private func addMockDataIfNeeded() {
-        // Don't add any mock data - start with 0 consumed calories
-        return
-    }
-    
-    private func requestHealthKitPermission() {
-        guard HKHealthStore.isHealthDataAvailable() else { return }
-        
-        let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
-        let readTypes: Set<HKObjectType> = [stepType]
-        
-        healthStore.requestAuthorization(toShare: nil, read: readTypes) { success, error in
-            if success {
-                DispatchQueue.main.async {
-                    fetchStepCount()
-                }
-            } else {
-                DispatchQueue.main.async {
-                    showingHealthKitError = true
-                }
-            }
-        }
-    }
-    
-    private func fetchStepCount() {
-        guard HKHealthStore.isHealthDataAvailable() else { return }
-        
-        let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
-        let calendar = Calendar.current
-        let startDate = calendar.startOfDay(for: Date())
-        let endDate = Date()
-        
-        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
-        
-        let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, _ in
-            guard let result = result, let sum = result.sumQuantity() else { return }
-            
-            DispatchQueue.main.async {
-                stepCount = Int(sum.doubleValue(for: HKUnit.count()))
-            }
-        }
-        
-        healthStore.execute(query)
     }
     
     private func getTodaysEntries() -> [CalorieEntry] {
@@ -386,11 +324,6 @@ struct ContentView: View {
     }
     
     private func progressBarWidth(for totalWidth: CGFloat) -> CGFloat {
-        let progress = min(Double(consumedCaloriesToday) / Double(dailyCalorieGoal), 1.0)
-        return totalWidth * CGFloat(progress)
-    }
-    
-    private func progressBarWidthForFullRow(totalWidth: CGFloat) -> CGFloat {
         let progress = min(Double(consumedCaloriesToday) / Double(dailyCalorieGoal), 1.0)
         return totalWidth * CGFloat(progress)
     }

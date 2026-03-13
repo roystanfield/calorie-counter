@@ -17,7 +17,7 @@ class CalorieManager {
     }
     
     func addCalories(_ calories: Int, for date: Date = Date()) {
-        let entry = CalorieEntry(date: date, calories: calories)
+        let entry = CalorieEntry(calories: calories, date: date)
         modelContext.insert(entry)
         
         do {
@@ -51,6 +51,57 @@ class CalorieManager {
         } catch {
             print("Failed to fetch calories: \(error)")
             return 0
+        }
+    }
+    
+    func getTotalCaloriesForToday() -> Int {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: Date())
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        let predicate = #Predicate<CalorieEntry> { entry in
+            entry.date >= startOfDay && entry.date < endOfDay
+        }
+        
+        let descriptor = FetchDescriptor<CalorieEntry>(predicate: predicate)
+        
+        do {
+            let entries = try modelContext.fetch(descriptor)
+            return entries.reduce(0) { $0 + $1.calories }
+        } catch {
+            print("Failed to fetch calories: \(error)")
+            return 0
+        }
+    }
+    
+    func getTodaysEntries() -> [CalorieEntry] {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: Date())
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        let predicate = #Predicate<CalorieEntry> { entry in
+            entry.date >= startOfDay && entry.date < endOfDay
+        }
+        
+        let descriptor = FetchDescriptor<CalorieEntry>(predicate: predicate)
+        
+        do {
+            let entries = try modelContext.fetch(descriptor)
+            return entries
+        } catch {
+            print("Failed to fetch today's entries: \(error)")
+            return []
+        }
+    }
+    
+    func deleteEntry(_ entry: CalorieEntry) {
+        modelContext.delete(entry)
+        
+        do {
+            try modelContext.save()
+            print("Entry deleted successfully")
+        } catch {
+            print("Failed to delete entry: \(error)")
         }
     }
     

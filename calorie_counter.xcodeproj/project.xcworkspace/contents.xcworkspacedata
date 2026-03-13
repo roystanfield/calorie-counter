@@ -5,9 +5,6 @@
       location = "self:">
    </FileRef>
    <FileRef
-      location = "group:README.md">
-   </FileRef>
-   <FileRef
-      location = "group:LICENSE">
+      location = "group:Info 4.plist">
    </FileRef>
 </Workspace>
