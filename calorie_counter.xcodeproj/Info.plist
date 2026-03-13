@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSHealthShareUsageDescription</key>
+    <string>This app reads step count data from Health to display alongside your calorie intake for better health tracking.</string>
+    <key>NSHealthUpdateUsageDescription</key>
+    <string>This app may write health data to sync your information across devices.</string>
+</dict>
+</plist>
